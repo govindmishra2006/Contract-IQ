@@ -38,6 +38,12 @@ const contractSchema = mongoose.Schema({
     },
     extractedText:{
         type:String,
+    },
+    summary:{
+        type:String
+    },
+    riskAnalysis:{
+        type:Object
     }
 },{timestamps:true})
 
