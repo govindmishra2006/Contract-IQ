@@ -1,5 +1,6 @@
 import Contract from "../models/contract.model.js";
 import uploadToS3 from "../utils/uploadToS3.js";
+import extractTextFromPDF from "../utils/extractTextFromPDF.js";
 
 export const createContract = async (req, res) => {
   try {
@@ -95,6 +96,10 @@ export const uploadContract = async(req,res)=>{
         }
 
         const uploadedFile = await uploadToS3(req.file);
+        // Extract text from the uploaded pdf
+
+        const extractedText = await extractTextFromPDF(req.file.buffer);
+
         const contract = await Contract.create({
             title:req.file.originalname,
             description:"Uploaded contract",
@@ -103,6 +108,7 @@ export const uploadContract = async(req,res)=>{
             fileName:req.file.originalname,
             fileKey:req.file.fileKey,
             fileUrl:uploadedFile.fileUrl,
+            extractedText
         })
         res.status(201).json({
             message:"contract uploaded successfully",

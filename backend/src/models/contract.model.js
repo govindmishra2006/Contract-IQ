@@ -35,6 +35,9 @@ const contractSchema = mongoose.Schema({
     },
     fileUrl:{
         type:String
+    },
+    extractedText:{
+        type:String,
     }
 },{timestamps:true})
 

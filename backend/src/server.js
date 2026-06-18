@@ -5,6 +5,7 @@ dotenv.config();
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/user.route.js"
 import contractRoutes from "./routes/contract.route.js"
+import aiRoutes from "./routes/ai.route.js"
 
 connectDB();
 const app = express();
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/users",userRoutes);
 app.use("/api/contracts",contractRoutes);
+app.use("/api/ai",aiRoutes);
 
 app.get("/",(req,res)=>{
     res.send("ContractIQ Api running");
