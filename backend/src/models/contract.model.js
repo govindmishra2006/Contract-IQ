@@ -26,6 +26,15 @@ const contractSchema = mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"User",
         required:true,
+    },
+    fileName:{
+        type:String
+    },
+    fileKey:{
+        type:String
+    },
+    fileUrl:{
+        type:String
     }
 },{timestamps:true})
 

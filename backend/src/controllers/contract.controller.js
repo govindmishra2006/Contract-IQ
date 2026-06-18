@@ -1,4 +1,5 @@
 import Contract from "../models/contract.model.js";
+import uploadToS3 from "../utils/uploadToS3.js";
 
 export const createContract = async (req, res) => {
   try {
@@ -82,3 +83,36 @@ export const deleteContract = async (req, res) => {
     });
   }
 };
+
+export const uploadContract = async(req,res)=>{
+    try {
+        // check if file was uploaded 
+
+        if(!req.file){
+            return res.status(400).json({
+                message:"no file uploaded"
+            })
+        }
+
+        const uploadedFile = await uploadToS3(req.file);
+        const contract = await Contract.create({
+            title:req.file.originalname,
+            description:"Uploaded contract",
+            contractType:"Other",
+            owner:req.user._id,
+            fileName:req.file.originalname,
+            fileKey:req.file.fileKey,
+            fileUrl:uploadedFile.fileUrl,
+        })
+        res.status(201).json({
+            message:"contract uploaded successfully",
+            contract,
+        })
+    } catch (error) {
+
+        console.log(error)
+        res.status(500).json({
+            message: error.message
+        })
+    }
+}
