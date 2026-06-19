@@ -44,7 +44,12 @@ const contractSchema = mongoose.Schema({
     },
     riskAnalysis:{
         type:Object
-    }
+    },
+    clauses:[{
+        clauseType:String,
+        title:String,
+        text:String,
+    }]
 },{timestamps:true})
 
 const Contract = mongoose.model("Contract",contractSchema)

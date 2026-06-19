@@ -6,6 +6,7 @@ import askContract from "../ai/askContract.js";
 import createEmbeddings from "../utils/createEmbeddings.js";
 import searchChunks from "../utils/searchChunks.js";
 import embedText from "../utils/localEmbeddings.js";
+import extractClauses from "../ai/extractClauses.js";
 
 export const testAI = async (req, res) => {
   try {
@@ -155,3 +156,53 @@ export const chatWithContract = async (req, res) => {
     });
   }
 };
+
+export const extractContractClauses = async(req,res)=>{
+  try {
+    const contractId = req.params.id;
+    const contract = await Contract.findById(contractId);
+
+    if(!contract)
+    {
+      return res.status(404).json({
+        message:"Contract Not found"
+      })
+    }
+
+    if(!contract.extractedText){
+      return res.status(400).json({
+        message:"Contract Text was not found"
+      })
+    }
+
+    const response = await extractClauses(contract.extractedText);
+    const cleanedResponse = response
+
+  .replace(/```json/g, "")
+
+  .replace(/```/g, "")
+
+  .trim();
+    let clauses;
+
+    try {
+      clauses = JSON.parse(cleanedResponse);
+    } catch (error) {
+      return res.status(500).json({
+        message:"Invalid JSON response from gemini"
+      })
+    }
+    contract.clauses = clauses;
+    await contract.save();
+
+    return res.status(200).json({
+      message:"Clauses extracted successfully",
+      clauses
+    })
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message:error.message
+    })
+  }
+}
