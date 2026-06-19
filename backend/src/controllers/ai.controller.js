@@ -7,6 +7,7 @@ import createEmbeddings from "../utils/createEmbeddings.js";
 import searchChunks from "../utils/searchChunks.js";
 import embedText from "../utils/localEmbeddings.js";
 import extractClauses from "../ai/extractClauses.js";
+import compareContracts from "../ai/compareContracts.js";
 
 export const testAI = async (req, res) => {
   try {
@@ -204,5 +205,61 @@ export const extractContractClauses = async(req,res)=>{
     return res.status(500).json({
       message:error.message
     })
+  }
+}
+export const compareTwoContracts = async(req,res)=>{
+  try {
+    const {contract1Id,contract2Id} = req.body;
+    if(!contract1Id || !contract2Id)
+    {
+      return res.status(400).json({
+        message:"Both contract IDs are required"
+      })
+    }
+    const contract1 = await Contract.findById(contract1Id);
+    const contract2 = await Contract.findById(contract2Id);
+
+    if(!contract1 || !contract2)
+    {
+      return res.status(404).json({
+        message:"One or both contracts not found"
+      })
+    }
+    if (!contract1.clauses?.length) {
+
+      return res.status(400).json({
+
+        message: "Contract 1 has no extracted clauses",
+
+      });
+
+    }
+
+    if (!contract2.clauses?.length) {
+
+      return res.status(400).json({
+
+        message: "Contract 2 has no extracted clauses",
+
+      });
+    }
+    const response = await compareContracts(contract1.clauses,contract2.clauses);
+    const cleanedResponse = response
+
+      .replace(/```json/g, "")
+
+      .replace(/```/g, "")
+
+      .trim();
+    
+    const comparison = JSON.parse(cleanedResponse);
+    return res.status(200).json({
+      comparison
+    })
+  } catch (error) {
+      console.log(error)
+      return res.status(500).json({
+        message:error.message
+      })
   }
 }
