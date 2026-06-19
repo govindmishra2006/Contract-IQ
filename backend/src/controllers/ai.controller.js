@@ -8,6 +8,7 @@ import searchChunks from "../utils/searchChunks.js";
 import embedText from "../utils/localEmbeddings.js";
 import extractClauses from "../ai/extractClauses.js";
 import compareContracts from "../ai/compareContracts.js";
+import redlineClause from "../ai/redlineClause.js";
 
 export const testAI = async (req, res) => {
   try {
@@ -261,5 +262,48 @@ export const compareTwoContracts = async(req,res)=>{
       return res.status(500).json({
         message:error.message
       })
+  }
+}
+export const redlineContractClause = async(req,res)=>{
+  try {
+    const {contractId,clauseType} = req.body;
+    if(!contractId || !clauseType)
+    {
+      return res.status(400).json({
+        message:"Both contract ID and clause type are required"
+      })
+    }
+    const contract = await Contract.findById(contractId);
+    if(!contract)
+    {
+      return res.status(404).json({
+        message:"Contract not found"
+      })
+    }
+    const clause = contract.clauses.find((c)=>c.clauseType.toLowerCase() === clauseType.toLowerCase());
+    if(!clause)
+    {
+      return res.status(404).json({
+        message:"Clause not found in contract"
+      })
+    }
+    const response = await redlineClause(clause);
+    const cleanedResponse = response
+
+      .replace(/```json/g, "")
+
+      .replace(/```/g, "")
+
+      .trim();
+    
+    const redline = JSON.parse(cleanedResponse);
+    return res.status(200).json({
+      redline
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      message:error.message
+    })
   }
 }
