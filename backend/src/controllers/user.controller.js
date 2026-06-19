@@ -23,7 +23,7 @@ export const signup = async (req,res)=>{
         })
         if(existingUser)
         {
-           return res.json(400).json({
+           return res.status(400).json({
                message: "User already exists"
            })
         }
@@ -43,7 +43,7 @@ export const signup = async (req,res)=>{
         const token = generateToken(user._id);
 
         res.status(200).json({
-            _id: user.__id,
+            _id: user._id,
             fullName: user.fullName,
             email:user.email,
             token,
